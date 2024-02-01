@@ -70,11 +70,7 @@ class FileStorage:
         Delete obj from __objects if it’s inside - if obj is equal to None,
         the method should not do anything
         """
-        if obj is None:
-            return
-
-        obj_key = "{}.{}".format(obj.__class__.__name__, obj.id)
-
-        if obj_key in FileStorage.__objects:
-            del FileStorage.__objects[obj_key]
-            self.save()  # Save the changes to the file
+        if obj is not None:
+            obj_key = "{}.{}".format(obj.__class__.__name__, obj.id)
+            if obj_key in FileStorage.__objects:
+                del FileStorage.__objects[obj_key]
