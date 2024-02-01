@@ -67,10 +67,16 @@ class FileStorage:
 
     def delete(self, obj=None):
         """
-        Delete obj from __objects if it’s inside - if obj is equal to None,
-        the method should not do anything
+         Delete obj from __objects if it’s inside - if obj is equal to None,
+           the method should not do anything
         """
-        if obj is not None:
-            obj_key = "{}.{}".format(obj.__class__.__name__, obj.id)
-            if obj_key in FileStorage.__objects:
-                del FileStorage.__objects[obj_key]
+        if obj is None:
+            return
+        obj_to_del = f"{obj.__class__.__name__}.{obj.id}"
+
+        try:
+            del FileStorage.__objects[obj_to_del]
+        except AttributeError:
+            pass
+        except KeyboardInterrupt:
+            pass
