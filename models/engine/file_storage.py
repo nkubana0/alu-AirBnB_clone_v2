@@ -50,16 +50,16 @@ class FileStorage:
     def reload(self):
         """Loads storage dictionary from file."""
         classes = {
-                    'BaseModel': BaseModel, 'User': User, 'Place': Place,
-                    'State': State, 'City': City, 'Amenity': Amenity,
-                    'Review': Review
-                  }
+            'BaseModel': BaseModel, 'User': User, 'Place': Place,
+            'State': State, 'City': City, 'Amenity': Amenity,
+            'Review': Review
+        }
         try:
             temp = {}
             with open(FileStorage.__file_path, 'r') as f:
                 temp = json.load(f)
                 for key, val in temp.items():
-                        self.all()[key] = classes[val['__class__']](**val)
+                    self.all()[key] = classes[val['__class__']](**val)
         except FileNotFoundError:
             pass
         except json.decoder.JSONDecodeError:
@@ -67,16 +67,14 @@ class FileStorage:
 
     def delete(self, obj=None):
         """
-         Delete obj from __objects if it’s inside - if obj is equal to None,
-           the method should not do anything
+        Delete obj from __objects if it’s inside - if obj is equal to None,
+        the method should not do anything
         """
         if obj is None:
             return
-        obj_to_del = f"{obj.__class__.__name__}.{obj.id}"
 
-        try:
-            del FileStorage.__objects[obj_to_del]
-        except AttributeError:
-            pass
-        except KeyboardInterrupt:
-            pass
+        obj_key = "{}.{}".format(obj.__class__.__name__, obj.id)
+
+        if obj_key in FileStorage.__objects:
+            del FileStorage.__objects[obj_key]
+            self.save()  # Save the changes to the file
