@@ -20,7 +20,7 @@ class FileStorage:
 
     def new(self, obj):
         """Adds new object to storage dictionary"""
-         if obj is not None:
+        if obj is not None:
             key = obj.__class__.__name__ + "." + obj.id
             self.__objects[key] = obj
 
