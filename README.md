@@ -23,7 +23,7 @@ This repository contains the initial stage of a student project to build a clone
 <br>
 <center> <h2>General Use</h2> </center>
 
-1. First clone this repository.
+1. First_ clone_ this repository.
 
 3. Once the repository is cloned locate the "console.py" file and run it as follows:
 ```
@@ -133,7 +133,7 @@ Usage: <class_name>.update(<_id>, <attribute_name>, <attribute_value>)
 ```
 ###### Example 3: Update User (by dictionary)
 Usage: <class_name>.update(<_id>, <dictionary>)
-```
+i```
 (hbnb) User.update("98bea5de-9cb0-4d78-8a9d-c4de03521c30", {'name': 'Fred the Frog', 'age': 9})
 (hbnb)
 (hbnb) User.all()
