@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 """
 Module for console
 """
@@ -6,6 +6,9 @@ import cmd
 import re
 import shlex
 import ast
+import os
+import mysql.connector
+from mysql.connector import errorcode
 from models import storage
 from models.base_model import BaseModel
 from models.user import User
@@ -14,7 +17,6 @@ from models.place import Place
 from models.review import Review
 from models.state import State
 from models.city import City
-
 
 
 def split_curly_braces(e_arg):
