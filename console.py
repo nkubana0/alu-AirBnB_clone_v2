@@ -107,7 +107,7 @@ class HBNBCommand(cmd.Cmd):
             storage.save()
         
         except Exception as e:
-        print(f"Error creating instance: {e}")
+            print(f"Error creating instance: {e}")
         
     def do_show(self, arg):
         """
