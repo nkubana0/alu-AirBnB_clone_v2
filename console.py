@@ -6,9 +6,6 @@ import cmd
 import re
 import shlex
 import ast
-import os
-import mysql.connector
-from mysql.connector import errorcode
 from models import storage
 from models.base_model import BaseModel
 from models.user import User
@@ -17,6 +14,7 @@ from models.place import Place
 from models.review import Review
 from models.state import State
 from models.city import City
+
 
 
 def split_curly_braces(e_arg):
@@ -83,44 +81,34 @@ class HBNBCommand(cmd.Cmd):
     def do_create(self, arg):
         """
         Create a new instance of BaseModel and save it to the JSON file.
-        Usage: create <class_name>
+        Usage: create <class_name> <attribute_name1=value1> <attribute_name2=value2> ...
         """
         try:
-            class_name = arg.split(" ")[0]
-            if len(class_name) == 0:
-                print("** class name missing **")
+            commands = shlex.split(arg)
+            class_name = commands[0]
+            
+            if len(commands) < 2:
+                print(f"** attributes missing for {class_name} creation **")
                 return
-            if class_name and class_name not in self.valid_classes:
+                
+            # Extract attribute_name=value pairs
+            attribute_pairs = [pair.split("=") for pair in commands[1:]]
+            kwargs = {key: eval(value) if value.startswith('"') else value for key, value in attribute_pairs}
+            
+            # Check if class_name is valid
+            if class_name not in self.valid_classes:
                 print("** class doesn't exist **")
                 return
-
-            kwargs = {}
-            commands = arg.split(" ")
-            for i in range(1, len(commands)):
-                
-                key = commands[i].split("=")[0]
-                value = commands[i].split("=")[1]
-                #key, value = tuple(commands[i].split("="))
-                if value.startswith('"'):
-                    value = value.strip('"').replace("_", " ")
-                else:
-                    try:
-                        value = eval(value)
-                    except (SyntaxError, NameError):
-                        continue
-                kwargs[key] = value
-
-            if kwargs == {}:
-                new_instance = eval(class_name)()
-            else:
-                new_instance = eval(class_name)(**kwargs)
+            
+            # Create an instance with the given attributes
+            new_instance = eval(class_name)(**kwargs)
             storage.new(new_instance)
             print(new_instance.id)
             storage.save()
-        except ValueError:
-            print(ValueError)
-            return
-
+        
+        except Exception as e:
+        print(f"Error creating instance: {e}")
+        
     def do_show(self, arg):
         """
         Show the string representation of an instance.
