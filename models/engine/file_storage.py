@@ -1,60 +1,82 @@
-from sqlalchemy import create_engine
-from os import getenv
-from sqlalchemy.orm import scoped_session, sessionmaker, Session
-from sqlalchemy.exc import InvalidRequestError
-from models.base_model import Base
+#!/usr/bin/python3
+"""This module defines a class to manage file storage for hbnb clone"""
+import json
+from models.base_model import BaseModel
+from models.user import User
+from models.place import Place
+from models.state import State
+from models.city import City
+from models.amenity import Amenity
+from models.review import Review
 
 
-class DBStorage:
-    __engine = None
-    __session = None
-
-    def __init__(self):
-        username = getenv("HBNB_MYSQL_USER")
-        password = getenv("HBNB_MYSQL_PWD")
-        host = getenv("HBNB_MYSQL_HOST")
-        database_name = getenv("HBNB_MYSQL_DB")
-        database_url = "mysql+mysqldb://{}:{}@{}/{}".format(username, password, host, database_name)
-        self.__engine = create_engine(database_url, pool_pre_ping=True)
-
-        if getenv("HBNB_ENV") == "test":
-            Base.metadata.drop_all(self.__engine)
+class FileStorage:
+    """This class manages storage of hbnb models in JSON format"""
+    __file_path = 'file.json'
+    __objects = {}
 
     def all(self, cls=None):
-        objs_list = []
-        try:
-            if cls:
-                if isinstance(cls, str):
-                    cls = globals().get(cls)
-                if issubclass(cls, Base):
-                    objs_list = self.__session.query(cls).all()
-            else:
-                for subclass in Base.__subclasses__():
-                    objs_list.extend(self.__session.query(subclass).all())
-        except InvalidRequestError:
-            pass
+        """Returns a dictionary of models currently in storage.
 
-        obj_dict = {}
-        for obj in objs_list:
-            key = "{}.{}".format(obj.__class__.__name__, obj.id)
-            obj_dict[key] = obj
-        return obj_dict
+        Args:
+            cls (class, optional): If specified, filters the result to include
+                only objects of the specified class.
+
+        Returns:
+            dict: A dictionary containing objects in storage.
+        """
+        if cls:
+            if isinstance(cls, str):
+                cls = globals().get(cls)
+            if cls and issubclass(cls, BaseModel):
+                cls_dict = {k: v for k,
+                            v in self.__objects.items() if isinstance(v, cls)}
+                return cls_dict
+        return FileStorage.__objects
 
     def new(self, obj):
-        self.__session.add(obj)
-        self.__session.commit()
+        """Adds new object to storage dictionary"""
+        self.all().update({obj.to_dict()['__class__'] + '.' + obj.id: obj})
 
     def save(self):
-        self.__session.commit()
-
-    def delete(self, obj=None):
-        if obj:
-            self.__session.delete(obj)
-            self.__session.commit()
+        """Saves storage dictionary to file"""
+        with open(FileStorage.__file_path, 'w') as f:
+            temp = {}
+            temp.update(FileStorage.__objects)
+            for key, val in temp.items():
+                temp[key] = val.to_dict()
+            json.dump(temp, f)
 
     def reload(self):
-        Base.metadata.drop_all(self.__engine)
-        Base.metadata.create_all(self.__engine)
-        session_factory = sessionmaker(bind=self.__engine, expire_on_commit=False)
-        Session = scoped_session(session_factory)
-        self.__session = Session()
+        """Loads storage dictionary from file."""
+        classes = {
+                    'BaseModel': BaseModel, 'User': User, 'Place': Place,
+                    'State': State, 'City': City, 'Amenity': Amenity,
+                    'Review': Review
+                  }
+        try:
+            temp = {}
+            with open(FileStorage.__file_path, 'r') as f:
+                temp = json.load(f)
+                for key, val in temp.items():
+                        self.all()[key] = classes[val['__class__']](**val)
+        except FileNotFoundError:
+            pass
+        except json.decoder.JSONDecodeError:
+            pass
+
+    def delete(self, obj=None):
+        """
+         Delete obj from __objects if it’s inside - if obj is equal to None,
+           the method should not do anything
+        """
+        if obj is None:
+            return
+        obj_to_del = f"{obj.__class__.__name__}.{obj.id}"
+
+        try:
+            del FileStorage.__objects[obj_to_del]
+        except AttributeError:
+            pass
+        except KeyboardInterrupt:
+            pass
