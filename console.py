@@ -1,12 +1,7 @@
-<<<<<<< HEAD
 #!/usr/bin/env python3
-""" Console Module """
-=======
-#!/usr/bin/python
 """
 Module for console
 """
->>>>>>> 31be4b93e5b9569a5ccf96114bdc64d5e302cfd7
 import cmd
 import re
 import shlex
