@@ -14,8 +14,23 @@ from models.place import Place
 from models.review import Review
 from models.state import State
 from models.city import City
+import mysql.connector
 
 
+def establish_mysql_connection():
+    try:
+        # Establish MySQL connection
+        cnx = mysql.connector.connect(
+            user='hbnb_dev',
+            password='hbnb_dev_pwd',
+            host='localhost',
+            database='hbnb_dev_db'
+        )
+        print("MySQL connection established successfully!")
+        return cnx
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+        return None
 
 def split_curly_braces(e_arg):
     """
@@ -317,3 +332,5 @@ class HBNBCommand(cmd.Cmd):
 
 if __name__ == '__main__':
     HBNBCommand().cmdloop()
+
+connection = establish_mysql_connection()
