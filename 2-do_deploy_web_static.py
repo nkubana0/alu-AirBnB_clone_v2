@@ -15,9 +15,8 @@ def do_deploy(archive_path):
     """
     if not exists(archive_path):
         return False
-    
+        
     put(archive_path, "/tmp/")
-    
     filename = re.search(r'[^/]+$', archive_path).group(0)
     folder = "/data/web_static/releases/{}".format(
         os.path.splitext(filename)[0])
